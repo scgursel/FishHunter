@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime,timedelta
-
+# Kullanılabilecek endpointler
 BASE_URL = "https://api.mexc.com"
 market_data_end_point_ping = BASE_URL + "/api/v3/ticker/24hr"
 last_price = BASE_URL + "/api/v3/ticker/price"

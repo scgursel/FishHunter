@@ -3,11 +3,13 @@ import json
 import pandas as pd 
 import time
 
+import mexcapi
 # Mexc API endpoint URLs
 BASE_URL = "https://api.mexc.com"
 market_data_end_point_ping = BASE_URL + "/api/v3/ticker/24hr"
 last_price = BASE_URL + "/api/v3/ticker/price"
 kademe = BASE_URL + "/api/v3/depth"
+
 
 # Get market data for the last 24 hours
 def get_24hr():
