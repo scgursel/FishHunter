@@ -1,3 +1,4 @@
+import time
 import requests
 from datetime import datetime,timedelta
 # Kullanılabilecek endpointler
@@ -30,13 +31,12 @@ def getServerTimeHHMMSS():
         if response.status_code == 200:
                 return datetime.fromtimestamp(response.json().get("serverTime")/1000).strftime("%H:%M:%S")
         else:
-                "scggg error"
+                return "scggg error"
 def getSymbols():
         response = requests.get(BASE_URL+symbolsEndPoint)
         if response.status_code == 200:
                 data = response.json().get("data")
-                for item in data:
-                        print(item)
+                return data
                         
 def getExchangeInfo(symbol):
         postData = {"symbol=" : f"{symbol}"}
@@ -54,19 +54,33 @@ def getRecentTrades(symbol):
         postData = {"symbol": symbol}
         return requests.get(BASE_URL+recentTradeListEndP, params=postData).json()
 
-def getKlineData(symbol, interval, start_time=None, end_time=None, limit=500):
+def get_24hr():
+    response = requests.get(market_data_end_point_ping)
+    trade_pairs = response.json()
+    return trade_pairs
+
+def getKlineData(symbol, interval, start_time_minute=None, end_time_minute=None, limit=500):
     postData = {
         "symbol": symbol,
         "interval": interval,
         "limit": limit
     }
-    if start_time:
-        postData["startTime"] = start_time
-    if end_time:
-        postData["endTime"] = end_time
-    response = requests.get(BASE_URL+klineEndPoint, params=postData)
+    
+    if start_time_minute:
+        start_time_unix_ms = get_unix_timestamp_milliseconds(hour=00, minute=start_time_minute)
+        postData["startTime"] = start_time_unix_ms
+    
+    if end_time_minute:
+        end_time_unix_ms = get_unix_timestamp_milliseconds(hour=00, minute=end_time_minute)
+        postData["endTime"] = end_time_unix_ms
+    
+    response = requests.get(BASE_URL + klineEndPoint, params=postData)
     return response.json()
 
+def get_unix_timestamp_milliseconds(hour, minute):
+    now = datetime.now()
+    today = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    return int(today.timestamp()) * 1000
         
 # print("Test connection resultt -> ",testConnection())   
 # print(getServerTimeHHMMSS())  
@@ -79,13 +93,24 @@ def getKlineData(symbol, interval, start_time=None, end_time=None, limit=500):
 
 # print(getDepth("BTCUSDT"))
 #getRecentTrades("MXUSDT")
-symbol = "MXUSDT"
-interval = "1"
-start_time = 1609459200000  
-end_time = 1612137600000    
-limit = 1000
-yesterday = datetime.now() - timedelta(days=1)
-yesterday = yesterday.replace(hour=18,minute=59,second=0,microsecond=0)
+# symbol = "MXUSDT"
+interval = "1m"
+# start_time = 1609459200000  
+# end_time = 1612137600000    
+# limit = 1000
+# yesterday = datetime.now() - timedelta(days=1)
+# yesterday = yesterday.replace(hour=18,minute=59,second=0,microsecond=0)
 
-print(int(yesterday.timestamp() * 1000))
-print(getKlineData(symbol=symbol,interval=interval,start_time=start_time, end_time=end_time))
+# print(int(yesterday.timestamp() * 1000))
+# print(getKlineData("MXUSDT",interval=interval,end_time_minute=35, start_time_minute=33, ))
+
+# start_time = time.time()
+# symbols = getSymbols()
+# ctr =0
+# for item in symbols:
+#         print(item)
+#         getKlineData(item,interval=interval,end_time_minute=59, start_time_minute=58)
+#         ctr+=1
+# end_time = time.time()
+# print("Time ->> ",end_time-start_time)        
+# print("item count-> ",ctr)
