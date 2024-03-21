@@ -121,10 +121,10 @@ async def calculate():
                 if intersection_list:
                     for i in range(len(intersection_list)):
                         Symbol = intersection_list[i]
-                        SymbolInfo = await mexcapi.GetTickerPrice_async(symbol=Symbol)  # Assuming there's an asynchronous version
+                        SymbolInfo = await mexcapi.GetTickerPrice(symbol=Symbol)  # Assuming there's an asynchronous version
                         SymbolLastPrice = SymbolInfo["price"]
-                        SymbolCountInfo = await mexcapi.getDepth_async(symbol=Symbol)  # Assuming there's an asynchronous version
-                        ServerTime = await mexcapi.getServerTimeHHMMSS_async()  # Assuming there's an asynchronous version
+                        SymbolCountInfo = await mexcapi.getDepth(symbol=Symbol)  # Assuming there's an asynchronous version
+                        ServerTime = await mexcapi.getServerTimeHHMMSS()  # Assuming there's an asynchronous version
                         # Telegram messages
                         message = f"Signal Time:\n{ServerTime}\nName:\n{Symbol}\nPrice:\n{SymbolLastPrice}\nDepth Count:\n{SymbolCountInfo}"
                         print(message)
@@ -136,7 +136,7 @@ async def main():
     await calcTask
     last_update_id = None
     while True:
-        updates = await telegram.get_updates_async(offset=last_update_id)
+        updates = await telegram.get_updates(offset=last_update_id)
         if updates and updates['result']:
             process_message(updates['result'][-1])
             last_update_id = updates['result'][-1]['update_id'] + 1
