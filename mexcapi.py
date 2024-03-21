@@ -4,7 +4,7 @@ from datetime import datetime,timedelta
 # Kullanılabilecek endpointler
 BASE_URL = "https://api.mexc.com"
 market_data_end_point_ping = BASE_URL + "/api/v3/ticker/24hr"
-last_price = BASE_URL + "/api/v3/ticker/price"
+GetTickerPrice = BASE_URL + "/api/v3/ticker/price"
 kademe = BASE_URL + "/api/v3/depth"
 
 testEndPoint ="/api/v3/ping"
@@ -81,7 +81,11 @@ def get_unix_timestamp_milliseconds(hour, minute):
     now = datetime.now()
     today = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
     return int(today.timestamp()) * 1000
-        
+
+def getTickerPrice(symbol):
+        postData = {"symbol": symbol}
+        ticker = requests.get(BASE_URL+depthEndPoint,params=postData).json()
+        return ticker
 # print("Test connection resultt -> ",testConnection())   
 # print(getServerTimeHHMMSS())  
 # print(datetime.now().strftime("%H:%M:%S"))
