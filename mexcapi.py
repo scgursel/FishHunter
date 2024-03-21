@@ -1,4 +1,5 @@
 import time
+import pandas as pd 
 import requests
 from datetime import datetime,timedelta
 # Kullanılabilecek endpointler
@@ -54,10 +55,10 @@ def getRecentTrades(symbol):
         postData = {"symbol": symbol}
         return requests.get(BASE_URL+recentTradeListEndP, params=postData).json()
 
-def get_24hr():
+def get_24hr()-> pd.DataFrame:
     response = requests.get(market_data_end_point_ping)
     trade_pairs = response.json()
-    return trade_pairs
+    return pd.DataFrame(trade_pairs)
 
 def getKlineData(symbol, interval, start_time_minute=None, end_time_minute=None, limit=500):
     postData = {

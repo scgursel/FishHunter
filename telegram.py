@@ -5,6 +5,10 @@ import time
 import json
 import requests
 import sys
+
+import threading
+
+
 python_executable = sys.executable
 
 BOT_TOKEN = '7156360679:AAGSJaMWC-noHSZrlA1xDuk0jlq5WOxdG4Q'
@@ -29,14 +33,6 @@ def run_script():
     return result.stdout
 
 
-def process_message(message):
-    text = message['message']['text']
-    print(text)
-    if text == '/run':
-        output = run_script()
-        send_mesagge("script runnnss scgg")
-    else:
-        print('Unknown command')
 
 def get_updates(offset=None):
     url = f'https://api.telegram.org/bot{BOT_TOKEN}/getUpdates'
@@ -48,19 +44,4 @@ def get_updates(offset=None):
         return response.json()
     return None
 
-def main():
-    last_update_id = None
-    while True:
-        updates = get_updates(offset=last_update_id)
-        if updates and updates['result']:
-            for update in updates['result']:
-                print("update")
-                print(update)
-                process_message(update)
-                last_update_id = update['update_id'] + 1
-        else:
-            print("No new messages.")
-        time.sleep(1)
 
-if __name__ == "__main__":
-    main()
