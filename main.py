@@ -12,30 +12,7 @@ BASE_URL = "https://api.mexc.com"
 market_data_end_point_ping = BASE_URL + "/api/v3/ticker/24hr"
 last_price = BASE_URL + "/api/v3/ticker/price"
 kademe = BASE_URL + "/api/v3/depth"
-global isRun 
 isRun =False
-# Get market data for the last 24 hours
-
-
-# Perform operations on market data
-#def kez():
-#    a_list = mexcapi.get_24hr()
-#    df = pd.DataFrame(a_list)
-#    df["priceChangePercent"] = df["priceChangePercent"].astype(float)
-#    sorted_df = df.iloc[df["priceChangePercent"].sort_values(ascending=False).index]
-#    selected_columns = sorted_df[["symbol", "priceChangePercent"]]
-#    threshold = -0.29  
-#    filtered_df = selected_columns[sorted_df["priceChangePercent"] < threshold]
-#    listeson20 = filtered_df["symbol"].to_list()
-#
-#    df["volume"] = df["volume"].astype(float)
-#    sorted_df = df.iloc[df["volume"].sort_values(ascending=False).index]
-#    selected_columns = sorted_df[["symbol", "volume"]]
-#    return listeson20, selected_columns
-# def Get24HrSnap() -> pd.DataFrame:
-#     Get24HrSnap = mexcapi.get_24hr()
-#     df = pd.DataFrame(Get24HrSnap)
-#     return df
 def VolumeCon(Get24HrSnapdf: pd.DataFrame) -> pd.DataFrame:
     df = Get24HrSnapdf
     df["volume"] = df["volume"].astype(float)
@@ -67,40 +44,20 @@ def PercentConComparsion(PercentConSnap1,PercentConSnap2):
     DifferenceListOfLast20 = set_2.difference(set_1)
     return DifferenceListOfLast20
 
-# Main loop
-timenow = datetime.now()
-nowtime = timenow.strftime("%H:%M:%S")
-year = timenow.year
-mouth = timenow.month
-day = timenow.day
-future_date = datetime(year, mouth, day, 18, 58, 0)
-futuretime = future_date.strftime("%H:%M:%S")
-endTime = datetime(year, mouth, day, 19 , 2, 0)
-# while futuretime > nowtime:
-#     timeas = datetime.now()
-#     nowtime = timeas.strftime("%H:%M:%S")
-#     time.sleep(0.01)
-# while nowtime < endTime: # while True için opsiyon olabilir
-#     nowtime = timeas.strftime("%H:%M:%S") 
-
-
-# Define a lock object
-import asyncio
-
-async def calculate():
+def calculate():
     global isRun
-    await asyncio.sleep(1)
+    time.sleep(1)
     while True:
         if not isRun:
             break
         print(isRun)
-        interval = 60 # time interval in seconds
+        interval = 2 # time interval in seconds
         VolumeConParam = 12 # VolumeCon = 12 whole number in percent 12 = %12
         PercentConParam = -0.29 # float number in percent -0.29 = -%29
 
-        snap1 = await mexcapi.get_24hr_async()  # Assuming there's an asynchronous version of get_24hr()
-        # await asyncio.sleep(interval)
-        snap2 = await mexcapi.get_24hr_async()  # Assuming there's an asynchronous version of get_24hr()
+        snap1 = mexcapi.get_24hr()  # Assuming there's an asynchronous version of get_24hr()
+        time.sleep(interval)
+        snap2 = mexcapi.get_24hr()  # Assuming there's an asynchronous version of get_24hr()
         
         Volumedf1 = VolumeCon(Get24HrSnapdf=snap1)
         Volumedf2 = VolumeCon(Get24HrSnapdf=snap2)
@@ -121,52 +78,40 @@ async def calculate():
                 if intersection_list:
                     for i in range(len(intersection_list)):
                         Symbol = intersection_list[i]
-                        SymbolInfo = await mexcapi.GetTickerPrice(symbol=Symbol)  # Assuming there's an asynchronous version
+                        SymbolInfo = mexcapi.GetTickerPrice(symbol=Symbol)  # Assuming there's an asynchronous version
                         SymbolLastPrice = SymbolInfo["price"]
-                        SymbolCountInfo = await mexcapi.getDepth(symbol=Symbol)  # Assuming there's an asynchronous version
-                        ServerTime = await mexcapi.getServerTimeHHMMSS()  # Assuming there's an asynchronous version
+                        SymbolCountInfo = mexcapi.getDepth(symbol=Symbol)  # Assuming there's an asynchronous version
+                        ServerTime = mexcapi.getServerTimeHHMMSS()  # Assuming there's an asynchronous version
                         # Telegram messages
                         message = f"Signal Time:\n{ServerTime}\nName:\n{Symbol}\nPrice:\n{SymbolLastPrice}\nDepth Count:\n{SymbolCountInfo}"
-                        print(message)
+                        telegram.send_mesagge(message=message)
                 else:
                     print("No intersection between two lists.")
-
-async def main():
-    global isRun
-    await calcTask
-    last_update_id = None
-    while True:
-        updates = await telegram.get_updates(offset=last_update_id)
-        if updates and updates['result']:
-            process_message(updates['result'][-1])
-            last_update_id = updates['result'][-1]['update_id'] + 1
-        else:
-            print("No new messages.")
-        await asyncio.sleep(1)
-
-async def setIsRun(myBool):
-    global isRun
-    isRun = myBool
-
-async def process_message(message):
+def process_message(message):
     global isRun
     text = message['message']['text']
     print(text)
     if text == '/run':
         telegram.send_mesagge("script runnnss scgg")
-        await setIsRun(True)
+        isRun = True
+        threading.Thread(target=calculate).start()
     elif text == '/stop':
-        await setIsRun(False)
+        isRun = False
         telegram.send_mesagge("Stop script")    
     else:
         print('Unknown command')
 
-# Create an event loop
-loop = asyncio.get_event_loop()
+def main():
+    global isRun
+    last_update_id = None
+    while True:
+        updates = telegram.get_updates(offset=last_update_id)
+        if updates and updates['result']:
+            process_message(updates['result'][-1])
+            last_update_id = updates['result'][-1]['update_id'] + 1
+        else:
+            print("No new messages.")
+        time.sleep(1)
 
-# Start the tasks
-calcTask = loop.create_task(calculate())
-mainTask = loop.create_task(main())
-
-# Run the event loop
-loop.run_until_complete(mainTask)
+if __name__ == "__main__":
+    main()
