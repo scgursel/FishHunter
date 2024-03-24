@@ -84,9 +84,11 @@ def get_unix_timestamp_milliseconds(hour, minute):
     return int(today.timestamp()) * 1000
 
 def getTickerPrice(symbol):
-        postData = {"symbol": symbol}
-        ticker = requests.get(BASE_URL+depthEndPoint,params=postData).json()
-        return ticker
+        param = {"symbol": symbol}
+        ticker = requests.get(GetTickerPrice,params=param).json()
+        tickerName = ticker["symbol"]
+        tickerPrice = ticker["price"]
+        return tickerName , tickerPrice
 # print("Test connection resultt -> ",testConnection())   
 # print(getServerTimeHHMMSS())  
 # print(datetime.now().strftime("%H:%M:%S"))
@@ -99,7 +101,7 @@ def getTickerPrice(symbol):
 # print(getDepth("BTCUSDT"))
 #getRecentTrades("MXUSDT")
 # symbol = "MXUSDT"
-interval = "1m"
+#interval = "1m"
 # start_time = 1609459200000  
 # end_time = 1612137600000    
 # limit = 1000
