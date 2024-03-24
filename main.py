@@ -75,6 +75,26 @@ def LastPriceConComparsion(LastPrice1, LastPrice2, PercentCon, increase=True):
 
 
 def calculate():
+
+# Main loop
+timenow = datetime.now()
+nowtime = timenow.strftime("%H:%M:%S")
+year = timenow.year
+mouth = timenow.month
+day = timenow.day
+future_date = datetime(year, mouth, day, 18, 58, 0)
+futuretime = future_date.strftime("%H:%M:%S")
+endTime = datetime(year, mouth, day, 19 , 2, 0)
+# while futuretime > nowtime:
+#     timeas = datetime.now()
+#     nowtime = timeas.strftime("%H:%M:%S")
+#     time.sleep(0.01)
+# while nowtime < endTime: # while True için opsiyon olabilir
+#     nowtime = timeas.strftime("%H:%M:%S") 
+
+import asyncio
+
+async def calculate():
     global isRun
     global interval
     global VolumeConParam
@@ -112,6 +132,10 @@ def calculate():
                         SymbolName,SymbolLastPrice = SymbolInfo
                         SymbolCountInfo = mexcapi.getDepth(symbol=Symbol)  # Assuming there's an asynchronous version
                         ServerTime = mexcapi.getServerTimeHHMMSS()  # Assuming there's an asynchronous version
+                        SymbolInfo = await mexcapi.GetTickerPrice(symbol=Symbol)  # Assuming there's an asynchronous version
+                        SymbolLastPrice = SymbolInfo["price"]
+                        SymbolCountInfo = await mexcapi.getDepth_async(symbol=Symbol)  # Assuming there's an asynchronous version
+                        ServerTime = await mexcapi.getServerTimeHHMMSS_async()  # Assuming there's an asynchronous version
                         # Telegram messages
                         message = f"Signal Time:\n{ServerTime}\nName:\n{SymbolName}\nPrice:\n{SymbolLastPrice}\nDepth Count:\n{SymbolCountInfo}"
                         telegram.send_mesagge(message=message)
@@ -144,6 +168,7 @@ def main():
     last_update_id = None
     while True:
         updates = telegram.get_updates(offset=last_update_id)
+        updates = await telegram.get_updates_async(offset=last_update_id)
         if updates and updates['result']:
             process_message(updates['result'][-1])
             last_update_id = updates['result'][-1]['update_id'] + 1
@@ -153,4 +178,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
     
