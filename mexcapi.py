@@ -1,6 +1,6 @@
-# import time
-# import pandas as pd 
-# import requests
+import time
+import pandas as pd 
+import requests
 # from datetime import datetime,timedelta
 # # Kullanılabilecek endpointler
 # BASE_URL = "https://api.mexc.com"
